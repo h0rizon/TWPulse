@@ -31,7 +31,8 @@ TWP.scan:SetScript("OnUpdate", function()
         local spellName = GetSpellName(id, BOOKTYPE_SPELL)
         if not spellName then break end
 
-        if spellName ~= "Shoot" and spellName ~= "Auto Shot" then
+        -- one entry per name; ranks share a cooldown and must not each increment shared
+        if spellName ~= "Shoot" and spellName ~= "Auto Shot" and not seen[spellName] then
             local start, duration, enabled = GetSpellCooldown(id, BOOKTYPE_SPELL)
             if start and duration and enabled == 1 and start > 0 and duration > 2 then
                 local key = start .. ":" .. duration
@@ -42,7 +43,7 @@ TWP.scan:SetScript("OnUpdate", function()
         id = id + 1
     end
 
-    -- same start+duration on several spells is the wand timer, not those spells
+    -- same start+duration on several different spell names is the wand timer
     for name, info in next, seen do
         if shared[info.key] == 1 then
             if not TWP.tracked[name] then
